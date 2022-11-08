@@ -1,7 +1,7 @@
 import serial
 import io
 import sys
-import RPi
+import RPi.GPIO as GPIO
 import time
 import board
 import busio
@@ -37,7 +37,44 @@ class Motor:
             volt = 0
         return np.round(volt,3)
 
+    def set_leds(self):
+        if self.speed_multiplier > 0:
+            GPIO.output(self.led_reverse_channel, False)
+            GPIO.output(self.led_forward_channel, True)
+        elif self.speed_multiplier < 0:
+            GPIO.output(self.led_forward_channel, False)
+            GPIO.output(self.led_reverse_channel, True)
 
+        else:
+            GPIO.output(self.led_forward_channel, False)
+            GPIO.output(self.led_reverse_channel, False)
+
+    def get_direction(self):
+        # Logic is:
+        # Forward Reverse: FWD_CHAN REV_CHAN
+        # F       F (switch off): Low Low
+        # T       F (switch fwd): Low High
+        # F       T (switch rev): High Low
+
+        if self.forward_analog.voltage > 1.0 and self.reverse_analog.voltage < 1.0 and not self.__capacitor_discharging:
+            multiplier = -1
+        elif self.reverse_analog.voltage > 1.0 and self.forward_analog.voltage < 1.0 and not self.__capacitor_discharging:
+            self.__capacitor_discharging = False
+            multiplier = 1
+        else:
+            multiplier = 0
+
+
+
+        if self.forward_analog.voltage > 1.0 and self.reverse_analog.voltage > 1.0:
+            if not self.__capacitor_discharging:
+                multiplier = self.speed_multiplier * -1
+                self.__capacitor_discharging = True
+        
+        self.speed_multiplier = multiplier
+
+        self.set_leds()       
+        return multiplier       
     def voltage_to_speed(self,full_scale=3.3, scale='linear'):
 
         VOLT_MIN = 0.0
@@ -49,7 +86,7 @@ class Motor:
         if scale == 'linear':
             voltage = self.get_pot_voltage()
             print(voltage)
-            return int((SPEED_MAX-SPEED_MIN)/(VOLT_MAX-VOLT_MIN)*voltage)
+            return self.get_direction()*int((SPEED_MAX-SPEED_MIN)/(VOLT_MAX-VOLT_MIN)*voltage)
 
         if scale == 'log':
             # Does not work at the moment, need better function
@@ -104,10 +141,24 @@ class Motor:
 
         self.STEP_RESOLUTION = 51200
 
-        self.adc_channels = {0: ADS.P0, 1: ADS.P1, 2: ADS.P2, 3: ADS.P3}
-        self.channel = 0
-
         # Initialize ADC for speed control
+        self.adc_channels = {0: ADS.P0, 1: ADS.P1, 2: ADS.P2, 3: ADS.P3}
+        # Velocity channel reads in potiometer output
+        self.velocity_channel = 0
+        # Forward and reverse are linked to a SPDT switch, need to specify logic once we figure it out
+        self.forward_channel = 1
+        self.reverse_channel = 2
+
+        # Enable GPIO for LED control
+        GPIO.setmode(GPIO.BCM)
+
+        self.led_forward_channel = 18
+        self.led_reverse_channel = 24
+
+        GPIO.setup(self.led_forward_channel, GPIO.OUT)
+        GPIO.setup(self.led_reverse_channel, GPIO.OUT)
+                                                                                                                                                                                                                                                                                
+    
         # Create the I2C bus
         self.i2c = busio.I2C(board.SCL, board.SDA)
 
@@ -115,7 +166,12 @@ class Motor:
         self.ads = ADS.ADS1115(self.i2c)
 
         # Create single-ended input on channel 0
-        self.analog = AnalogIn(self.ads, self.adc_channels[self.channel])
+        self.analog = AnalogIn(self.ads, self.adc_channels[self.velocity_channel])
+        self.forward_analog = AnalogIn(self.ads, self.adc_channels[self.forward_channel])
+        self.reverse_analog = AnalogIn(self.ads, self.adc_channels[self.reverse_channel])
+
+        self.speed_multiplier = self.get_direction()
+        self.__capacitor_discharging = False
 
 
 if __name__ == '__main__':
@@ -124,8 +180,9 @@ if __name__ == '__main__':
     ronnie = Motor()
     try:
         while True:
-            #ronnie.set_velocity(velocity=0)
             out = ronnie.set_velocity(velocity=ronnie.voltage_to_speed(scale='linear'),output=True)
+            print('Forward voltage: {:.2f}; Reverse voltage: {:.2f}; Speed multiplier: {:}'.format(ronnie.forward_analog.voltage, ronnie.reverse_analog.voltage, ronnie.get_direction()))
+
 
     except: 
         ronnie.set_velocity(velocity=0, output=True)
