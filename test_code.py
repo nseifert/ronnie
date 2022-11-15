@@ -8,6 +8,49 @@ import busio
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import numpy as np
+import board
+import adafruit_displayio_ssd1306
+import displayio
+
+
+class Screen:
+
+    def clear_window(self):
+        splash = displayio.Group()
+        self.display.show(splash)
+
+    def draw_splash(self):
+        print('Drawing splash...')
+        splash = displayio.Group()
+        
+        color_bitmap = displayio.Bitmap(self.WIDTH, self.HEIGHT, 1)
+        color_palette = displayio.Palette(1)
+        color_palette[0] = 0xFFFFFF # White
+
+        bg_sprite = displayio.TileGrid(color_bitmap, pixel_shader=color_palette, x=0, y=0)
+        splash.append(bg_sprite)
+
+        inner_bitmap = displayio.Bitmap(self.WIDTH - 5  * 2, self.HEIGHT - 5 * 2, 1)
+        inner_palette = displayio.Palette(1)
+        inner_palette[0] = 0x000000 # Black
+        inner_sprite = displayio.TileGrid(inner_bitmap, pixel_shader=inner_palette, x=5, y=5)
+
+        splash.append(inner_sprite)
+
+        self.display.show(splash)
+
+    def draw_window(self):
+        pass 
+
+    def __init__(self):
+
+        self.WIDTH = 128
+        self.HEIGHT = 32
+
+        displayio.release_displays()
+        self.i2c = board.I2C()
+        display_bus = displayio.I2CDisplay(self.i2c, device_address=0x3C)
+        self.display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=128, height=32)
 
 class Motor:
 
@@ -29,13 +72,17 @@ class Motor:
             return False 
 
     def set_velocity(self, velocity: int, output=False):
+        print('Input velocity is: {:}'.format(velocity))
         return self.execute('SL {:}\r'.format(velocity), output=output)
 
     def get_pot_voltage(self):
-        volt = self.analog.voltage
-        if volt < 0.001:
-            volt = 0
-        return np.round(volt,3)
+        try:
+            volt = self.analog.voltage
+            if volt < 0.001:
+                volt = 0
+
+        finally:
+            return np.round(volt,3)
 
     def set_leds(self):
         if self.speed_multiplier > 0:
@@ -56,10 +103,13 @@ class Motor:
         # T       F (switch fwd): Low High
         # F       T (switch rev): High Low
 
-        if self.forward_analog.voltage > 1.0 and self.reverse_analog.voltage < 1.0 and not self.__capacitor_discharging:
+        if self.forward_analog.voltage > 2.0 and self.reverse_analog.voltage < 2.0:
+            if self.__capacitor_discharging:
+                self.__capacitor_discharging = False
             multiplier = -1
-        elif self.reverse_analog.voltage > 1.0 and self.forward_analog.voltage < 1.0 and not self.__capacitor_discharging:
-            self.__capacitor_discharging = False
+        elif self.reverse_analog.voltage > 2.0 and self.forward_analog.voltage < 2.0:
+            if self.__capacitor_discharging:
+                self.__capacitor_discharging = False
             multiplier = 1
         else:
             multiplier = 0
@@ -74,7 +124,8 @@ class Motor:
         self.speed_multiplier = multiplier
 
         self.set_leds()       
-        return multiplier       
+        return multiplier
+
     def voltage_to_speed(self,full_scale=3.3, scale='linear'):
 
         VOLT_MIN = 0.0
@@ -85,7 +136,7 @@ class Motor:
 
         if scale == 'linear':
             voltage = self.get_pot_voltage()
-            print(voltage)
+            print('Pot voltage: {:}'.format(voltage))
             return self.get_direction()*int((SPEED_MAX-SPEED_MIN)/(VOLT_MAX-VOLT_MIN)*voltage)
 
         if scale == 'log':
@@ -160,15 +211,15 @@ class Motor:
                                                                                                                                                                                                                                                                                 
     
         # Create the I2C bus
-        self.i2c = busio.I2C(board.SCL, board.SDA)
+        self.i2c_adc = busio.I2C(board.SCL, board.SDA)
 
         # Create the ADC object using the I2C bus
-        self.ads = ADS.ADS1115(self.i2c)
+        self.adc = ADS.ADS1115(self.i2c_adc)
 
         # Create single-ended input on channel 0
-        self.analog = AnalogIn(self.ads, self.adc_channels[self.velocity_channel])
-        self.forward_analog = AnalogIn(self.ads, self.adc_channels[self.forward_channel])
-        self.reverse_analog = AnalogIn(self.ads, self.adc_channels[self.reverse_channel])
+        self.analog = AnalogIn(self.adc, self.adc_channels[self.velocity_channel])
+        self.forward_analog = AnalogIn(self.adc, self.adc_channels[self.forward_channel])
+        self.reverse_analog = AnalogIn(self.adc, self.adc_channels[self.reverse_channel])
 
         self.speed_multiplier = self.get_direction()
         self.__capacitor_discharging = False
@@ -178,7 +229,12 @@ if __name__ == '__main__':
 
 
     ronnie = Motor()
+    screen = Screen()
+    screen.draw_splash()
+   
     try:
+        # Initialize screen
+        
         while True:
             out = ronnie.set_velocity(velocity=ronnie.voltage_to_speed(scale='linear'),output=True)
             print('Forward voltage: {:.2f}; Reverse voltage: {:.2f}; Speed multiplier: {:}'.format(ronnie.forward_analog.voltage, ronnie.reverse_analog.voltage, ronnie.get_direction()))
