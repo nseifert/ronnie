@@ -9,8 +9,9 @@ import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import numpy as np
 import board
-import adafruit_displayio_ssd1306
+import adafruit_ssd1306
 import displayio
+from PIL import Image, ImageDraw, ImageFont
 
 
 class Screen:
@@ -39,18 +40,74 @@ class Screen:
 
         self.display.show(splash)
 
-    def draw_window(self):
-        pass 
+    def hello_world(self):
+        image = Image.new("1", (self.WIDTH, self.HEIGHT))
+        draw = ImageDraw.Draw(image)
+
+        draw.rectangle((0, 0, self.WIDTH, self.HEIGHT), outline=255, fill=0)
+        draw.rectangle((5, 5, self.WIDTH- 5 - 1, self.HEIGHT -5 - 1), outline=0, fill=0)
+
+        font = ImageFont.load_default()
+
+        text = "Hello world!"
+        (font_width, font_height) = font.getsize(text)
+        draw.text((self.WIDTH // 2 - font_width // 2, self.HEIGHT // 2 - font_height // 2), text, font=font, fill=255)
+
+        # Display image
+        self.display.image(image)
+        self.display.show()
+
+    def show_values(self, velocity, direction, step=None):
+
+        self.current_draw_buffer.rectangle((0, 0, self.WIDTH, self.HEIGHT), outline=255, fill=0)
+        #self.current_window, self.current_draw_buffer = self.draw_blank_window()
+        direction_text = "Direction: {:}".format(self.direction_dict[direction])
+
+        # Write direction
+        (dir_font_width, dir_font_height) = self.font.getsize(direction_text)
+        self.current_draw_buffer.text((2, 0), direction_text, font=self.font, fill=255)
+
+        velocity_text = 'Speed: {:.1f} rpm'.format(velocity/self.MICROSTEP_RESOLUTION * 60)
+        (vel_font_width, vel_font_height) = self.font.getsize(velocity_text)
+        self.current_draw_buffer.text((2, dir_font_height-2), velocity_text, font=self.font, fill=255)
+
+        step_text = "Step: {:}".format(step)
+        (step_font_width, step_font_height) = self.font.getsize(step_text)
+        self.current_draw_buffer.text((2, dir_font_height+vel_font_height-6), step_text, font=self.font, fill=255)
+
+        self.display.image(self.current_window)
+        self.display.show()
+
+
+    def initialize_screen(self):
+
+        image = Image.new("1", (self.WIDTH, self.HEIGHT))
+        draw = ImageDraw.Draw(image)
+
+        # Create black background
+        draw.rectangle((0, 0, self.WIDTH, self.HEIGHT), outline=255, fill=0)
+        
+        self.display.image(image)
+        self.display.show()
+
+        return image, draw
 
     def __init__(self):
 
         self.WIDTH = 128
         self.HEIGHT = 32
+        self.MICROSTEP_RESOLUTION = 51200
 
         displayio.release_displays()
         self.i2c = board.I2C()
-        display_bus = displayio.I2CDisplay(self.i2c, device_address=0x3C)
-        self.display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=128, height=32)
+        #display_bus = displayio.I2CDisplay(self.i2c, device_address=0x3C)
+   
+        self.display = adafruit_ssd1306.SSD1306_I2C(self.WIDTH, self.HEIGHT, self.i2c)
+
+        self.font = ImageFont.truetype('/usr/share/fonts/truetype/piboto/Piboto-Bold.ttf')
+
+        self.direction_dict = {1: "---> FWD --->", -1: "<--- REV <---", 0: "--- STOP ---"}
+        self.current_window, self.current_draw_buffer = self.initialize_screen()
 
 class Motor:
 
@@ -83,6 +140,12 @@ class Motor:
 
         finally:
             return np.round(volt,3)
+        
+    def check_reset(self, channel):
+        if GPIO.input(channel) == GPIO.HIGH:
+            self.RESET_THIS_SHIT = True
+            
+        return self.RESET_THIS_SHIT    
 
     def set_leds(self):
         if self.speed_multiplier > 0:
@@ -156,6 +219,12 @@ class Motor:
 
     def self_identify(self):
         return self.execute('PR AL\r', output=True)
+    
+    def read_position(self):
+        return self.execute('PR P\r', output=True)
+    
+    def clear_position(self):
+        return self.execute('P 0\r', output=True)
 
     def flush_output(self):
         self.connection.flush()
@@ -189,6 +258,8 @@ class Motor:
         self.raw_connection = serial.Serial(self.addr, self.baud, timeout=self.timeout)
         self.connection = io.TextIOWrapper(io.BufferedRWPair(self.raw_connection, self.raw_connection))
         print('Connection to Ronnie is currently {:}'.format(self.isOpen()))
+        
+        self.__capacitor_discharging = False
 
         self.STEP_RESOLUTION = 51200
 
@@ -199,15 +270,20 @@ class Motor:
         # Forward and reverse are linked to a SPDT switch, need to specify logic once we figure it out
         self.forward_channel = 1
         self.reverse_channel = 2
+        self.reset_channel = 3
 
         # Enable GPIO for LED control
         GPIO.setmode(GPIO.BCM)
 
-        self.led_forward_channel = 18
-        self.led_reverse_channel = 24
+        self.led_forward_channel = 24
+        self.led_reverse_channel = 23
+        self.reset_button_channel = 18
 
         GPIO.setup(self.led_forward_channel, GPIO.OUT)
         GPIO.setup(self.led_reverse_channel, GPIO.OUT)
+        GPIO.setup(self.reset_button_channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        
+        GPIO.add_event_detect(self.reset_button_channel, GPIO.RISING, callback=self.check_reset)
                                                                                                                                                                                                                                                                                 
     
         # Create the I2C bus
@@ -223,6 +299,8 @@ class Motor:
 
         self.speed_multiplier = self.get_direction()
         self.__capacitor_discharging = False
+        
+        self.RESET_THIS_SHIT = False
 
 
 if __name__ == '__main__':
@@ -230,15 +308,26 @@ if __name__ == '__main__':
 
     ronnie = Motor()
     screen = Screen()
-    screen.draw_splash()
-   
+
     try:
         # Initialize screen
         
         while True:
-            out = ronnie.set_velocity(velocity=ronnie.voltage_to_speed(scale='linear'),output=True)
+            if ronnie.RESET_THIS_SHIT == True:
+                print('Motor resetting...')
+                ronnie.clear_position()
+                # Code to reset motor position based on encoder steps
+                ronnie.RESET_THIS_SHIT = False
+                # I want 2 buttons -- one that sets the encoder step = 0 position, and one that resets motor to step = 0 position.
+                
+                
+            velocity = ronnie.voltage_to_speed(scale='linear')
+            pos = ronnie.read_position()[2]
+            
+            out = ronnie.set_velocity(velocity=velocity,output=True)
+            screen.show_values(velocity, np.sign(velocity), step=pos)
+            
             print('Forward voltage: {:.2f}; Reverse voltage: {:.2f}; Speed multiplier: {:}'.format(ronnie.forward_analog.voltage, ronnie.reverse_analog.voltage, ronnie.get_direction()))
-
 
     except: 
         ronnie.set_velocity(velocity=0, output=True)
