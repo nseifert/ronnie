@@ -136,9 +136,9 @@ class StepperMotorControlApp:
 			try:
 				if self.__active_motor:
 					current_velocity = self.instrument.read_velocity()[2]
-					self.cur_velocity.set('Current Velocity: {:}'.format(current_velocity))
+					self.cur_velocity_label.config('Current Velocity: {:}'.format(current_velocity))
+					root.update()
 					time.sleep(1)
-					root.update_idletasks()
 				else: 
 					self.cur_velocity.set('Current Velocity: 0'.format(current_velocity))
 			except Exception as e:
@@ -171,6 +171,7 @@ class StepperMotorControlApp:
 		try:
 			# Send VISA command to start motor (replace with actual command)
 			self.instrument.set_velocity(self.instrument.velocity)
+			self.instrument.read_velocity()
 			self.current_status_label.config(text="Current Status: Running")
 			messagebox.showinfo("Success", "Motor started successfully!")
 		except Exception as e:
