@@ -125,13 +125,10 @@ class StepperMotorControlApp:
 
     def read_velocity(self):
         try:
-            if self.__active_motor:
-                current_velocity = self.instrument.read_velocity()
-                self.cur_velocity_label.config(text='Current Velocity: {:.0f}'.format(current_velocity))
-                self.root.after(1000, read_velocity)
-            else:
-                current_velocity = 0
-                self.cur_velocity_label.config(text='Current Velocity: 0'.format(current_velocity))
+            current_velocity = self.instrument.read_velocity()
+            self.cur_velocity_label.config(text='Current Velocity: {:.0f}'.format(current_velocity))
+            self.root.after(1000, read_velocity)
+
         except Exception as e:
             messagebox.showerror("Error", f"Failed to read motor velocity: {e}")
         
