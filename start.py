@@ -95,8 +95,9 @@ class StepperMotorControlApp:
         self.velocity_label = tk.Label(root, text="Velocity (RPM):")
         self.velocity_label.pack(pady=5)
         
-        self.cur_velocity_label = tk.Label(root, text='Current velocity:', command=self.read_velocity)
+        self.cur_velocity_label = tk.Label(root, text='Current velocity: 0')
         self.cur_velocity_label.pack(pady=5)
+		self.read_velocity()
 
         self.velocity_entry = tk.Entry(root)
         self.velocity_entry.pack(pady=5)
