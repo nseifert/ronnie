@@ -97,7 +97,7 @@ class StepperMotorControlApp:
         
         self.cur_velocity_label = tk.Label(root, text='Current velocity: 0')
         self.cur_velocity_label.pack(pady=5)
-		self.read_velocity()
+        self.read_velocity()
 
         self.velocity_entry = tk.Entry(root)
         self.velocity_entry.pack(pady=5)
@@ -130,6 +130,7 @@ class StepperMotorControlApp:
                 self.cur_velocity_label.config(text='Current Velocity: {:.0f}'.format(current_velocity))
                 self.root.after(1000, read_velocity)
             else:
+                current_velocity = 0
                 self.cur_velocity_label.config(text='Current Velocity: 0'.format(current_velocity))
         except Exception as e:
             messagebox.showerror("Error", f"Failed to read motor velocity: {e}")
