@@ -139,7 +139,7 @@ class StepperMotorControlApp:
                     self.cur_velocity.set('Current Velocity: {:.0f}'.format(current_velocity))
                     time.sleep(1)
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to read motor velocity: {e}\n", str(current_velocity))
+                messagebox.showerror("Error", f"Failed to read motor velocity: {e}\n" + str(current_velocity))
                 break
         
     def set_velocity(self):
