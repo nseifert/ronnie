@@ -127,6 +127,7 @@ class StepperMotorControlApp:
             self.status_label.config(text="Motor Status: Connected", fg="green")
             messagebox.showinfo("Success", "Motor connected successfully!")
             self.__active_motor = True
+			
             self.vel_thread.start()
             
         except Exception as e:
@@ -139,6 +140,7 @@ class StepperMotorControlApp:
                     current_velocity = self.instrument.read_velocity()[2]
                     self.cur_velocity.set('Current Velocity: {:}'.format(current_velocity))
                     time.sleep(1)
+					root.update_idletasks()
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to read motor velocity: {e}\n" + str(current_velocity))
                 break
