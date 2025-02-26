@@ -158,7 +158,7 @@ class StepperMotorControlApp:
 
 			# Send VISA command to set velocity (replace with actual command)
 			self.instrument.velocity = velocity
-			self.instrument.cur_velocity = velocity
+			self.instrument.read_velocity()
 			messagebox.showinfo("Success", f"Velocity set to {velocity} steps/sec")
 		except Exception as e:
 			messagebox.showerror("Error", f"Failed to set velocity: {e}")
