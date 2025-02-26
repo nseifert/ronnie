@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import serial
 import io
+from threading import Thread
 
 class Motor:
 
@@ -95,8 +96,14 @@ class StepperMotorControlApp:
         self.velocity_label = tk.Label(root, text="Velocity (RPM):")
         self.velocity_label.pack(pady=5)
         
-        self.cur_velocity_label = tk.Label(root, text='Current velocity: 0')
+        self.cur_velocity = tk.StringVar()      
+        self.cur_velocity_label = tk.Label(root, textvariable=self.cur_velocity)
         self.cur_velocity_label.pack(pady=5)
+        
+        # Current velocity update thread
+        self.vel_thread = Thread(target=self.read_velocity)
+        self.vel_thread.daemon = True
+
 
         self.velocity_entry = tk.Entry(root)
         self.velocity_entry.pack(pady=5)
@@ -119,18 +126,21 @@ class StepperMotorControlApp:
             self.status_label.config(text="Motor Status: Connected", fg="green")
             messagebox.showinfo("Success", "Motor connected successfully!")
             self.__active_motor = True
+            self.vel_thread.start()
+            
         except Exception as e:
             messagebox.showerror("Error", f"Failed to connect to motor: {e}")
 
     def read_velocity(self):
-        try:
-            if self.__active_motor:
-                current_velocity = self.instrument.read_velocity()
-                self.cur_velocity_label.config(text='Current Velocity: {:.0f}'.format(current_velocity))
-                
-            self.root.after(1000, read_velocity)    
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to read motor velocity: {e}")
+        while True:
+            try:
+                if self.__active_motor:
+                    current_velocity = self.instrument.read_velocity()
+                    self.cur_velocity.set(text='Current Velocity: {:.0f}'.format(current_velocity))
+                    time.sleep(1)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to read motor velocity: {e}")
+                break
         
     def set_velocity(self):
         if self.instrument is None:
