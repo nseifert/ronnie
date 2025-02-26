@@ -136,7 +136,7 @@ class StepperMotorControlApp:
             try:
                 if self.__active_motor:
                     current_velocity = self.instrument.read_velocity()[2]
-                    self.cur_velocity.set('Current Velocity: {:.0f}'.format(current_velocity))
+                    self.cur_velocity.set('Current Velocity: {:}'.format(current_velocity))
                     time.sleep(1)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to read motor velocity: {e}\n" + str(current_velocity))
