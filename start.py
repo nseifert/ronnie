@@ -80,7 +80,7 @@ class StepperMotorControlApp:
     def __init__(self,root):
         self.root = root
         self.root.title("Stepper Motor Control")
-		self.__active_motor = False
+        self.__active_motor = False
 
         # Initialize VISA resource manager
  
@@ -94,9 +94,9 @@ class StepperMotorControlApp:
 
         self.velocity_label = tk.Label(root, text="Velocity (RPM):")
         self.velocity_label.pack(pady=5)
-		
-		self.cur_velocity_label = tk.Label(root, text='Current velocity:', command=self.read_velocity)
-		self.cur_velocity_label.pack(pady=5)
+        
+        self.cur_velocity_label = tk.Label(root, text='Current velocity:', command=self.read_velocity)
+        self.cur_velocity_label.pack(pady=5)
 
         self.velocity_entry = tk.Entry(root)
         self.velocity_entry.pack(pady=5)
@@ -118,21 +118,21 @@ class StepperMotorControlApp:
             self.instrument = Motor()
             self.status_label.config(text="Motor Status: Connected", fg="green")
             messagebox.showinfo("Success", "Motor connected successfully!")
-			self.__active_motor = True
+            self.__active_motor = True
         except Exception as e:
             messagebox.showerror("Error", f"Failed to connect to motor: {e}")
 
-	def read_velocity(self):
-		try:
-			if self.__active_motor:
-				current_velocity = self.instrument.read_velocity()
-				self.cur_velocity_label.config(text='Current Velocity: {:.0f}'.format(current_velocity))
-				self.root.after(1000, read_velocity)
-			else:
-				self.cur_velocity_label.config(text='Current Velocity: 0'.format(current_velocity))
-		except Exception as e:
-			messagebox.showerror("Error", f"Failed to read motor velocity: {e}")
-		
+    def read_velocity(self):
+        try:
+            if self.__active_motor:
+                current_velocity = self.instrument.read_velocity()
+                self.cur_velocity_label.config(text='Current Velocity: {:.0f}'.format(current_velocity))
+                self.root.after(1000, read_velocity)
+            else:
+                self.cur_velocity_label.config(text='Current Velocity: 0'.format(current_velocity))
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to read motor velocity: {e}")
+        
     def set_velocity(self):
         if self.instrument is None:
             messagebox.showerror("Error", "Motor is not connected!")
@@ -177,6 +177,6 @@ class StepperMotorControlApp:
             messagebox.showerror("Error", f"Failed to stop motor: {e}")
 
 if __name__ == "__main__":
-	root = tk.Tk()
+    root = tk.Tk()
     app = StepperMotorControlApp(root)
     app.root.mainloop()
