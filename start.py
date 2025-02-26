@@ -128,8 +128,6 @@ class StepperMotorControlApp:
 			messagebox.showinfo("Success", "Motor connected successfully!")
 			self.__active_motor = True
 			
-			
-			
 		except Exception as e:
 			messagebox.showerror("Error", f"Failed to connect to motor: {e}")
 
@@ -160,6 +158,7 @@ class StepperMotorControlApp:
 
 			# Send VISA command to set velocity (replace with actual command)
 			self.instrument.velocity = velocity
+			self.instrument.cur_velocity = velocity
 			messagebox.showinfo("Success", f"Velocity set to {velocity} steps/sec")
 		except Exception as e:
 			messagebox.showerror("Error", f"Failed to set velocity: {e}")
