@@ -104,7 +104,7 @@ class StepperMotorControlApp:
 		# Current velocity update thread
 		self.vel_thread = Thread(target=self.read_velocity)
 		self.vel_thread.daemon = True
-
+		self.vel_thread.start()
 
 		self.velocity_entry = tk.Entry(root)
 		self.velocity_entry.pack(pady=5)
@@ -128,7 +128,7 @@ class StepperMotorControlApp:
 			messagebox.showinfo("Success", "Motor connected successfully!")
 			self.__active_motor = True
 			
-			self.vel_thread.start()
+			
 			
 		except Exception as e:
 			messagebox.showerror("Error", f"Failed to connect to motor: {e}")
@@ -141,6 +141,8 @@ class StepperMotorControlApp:
 					self.cur_velocity.set('Current Velocity: {:}'.format(current_velocity))
 					time.sleep(1)
 					root.update_idletasks()
+				else: 
+					self.cur_velocity.set('Current Velocity: 0'.format(current_velocity))
 			except Exception as e:
 				messagebox.showerror("Error", f"Failed to read motor velocity: {e}\n" + str(current_velocity))
 				break
