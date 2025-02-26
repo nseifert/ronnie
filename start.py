@@ -3,6 +3,7 @@ from tkinter import messagebox
 import serial
 import io
 from threading import Thread
+import time
 
 class Motor:
 
