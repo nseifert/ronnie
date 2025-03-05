@@ -52,7 +52,7 @@ class Pitaya():
 		# Set trigger
 		self.execute(f'SOUR{gen_settings['channel']+1}:TRIg:SOUR {gen_settings['trigger']}')
 		# Set parameters
-		self.execute(f'SOUR{gen_settings['channel']+1}:FUNC {gen_settings['type']}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:FUNC {gen_settings['type'].upper()}')
 		self.execute(f'SOUR{gen_settings['channel']+1}:FREQ:FIX {str(gen_settings['freq'])}')
 		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT {str(gen_settings['amp'])}')
 		self.execute(f'SOUR{gen_settings['channel']+1}:PHAS {str(gen_settings['phase'])}')
@@ -71,7 +71,7 @@ class Pitaya():
 		try:
 			chan = channel + 1
 			self.execute(f'OUTPUT{chan}: STATE ON')
-			self.execute(f'SOUR{chan}:TRIg:SOUR:INT')
+			self.execute(f'SOUR{chan}:TRIg:INT')
 			return True
 		except:
 			raise
