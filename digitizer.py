@@ -45,23 +45,23 @@ class Pitaya():
 					gen_settings.update({'trig_lvl': kwargs['trig_lvl']})
 		
 	# Reset synthesizer
-	self.con.execute('GEN:RST')
+		self.con.execute('GEN:RST')
 
-	# Set trigger
-	self.con.execute(f'SOUR{gen_settings['channel']+1}:TRIg:SOUR {gen_settings['trigger']}')
-	# Set parameters
-	self.con.execute(f'SOUR{gen_settings['channel']+1}:FUNC {gen_settings['type']}')
-	self.con.execute(f'SOUR{gen_settings['channel']+1}:FREQ:FIX {str(gen_settings['freq'])}')
-	self.con.execute(f'SOUR{gen_settings['channel']+1}:VOLT {str(gen_settings['amp'])}')
-	self.con.execute(f'SOUR{gen_settings['channel']+1}:PHAS {str(gen_settings['phase'])}')
-	self.con.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {str(gen_settings['offset'])}')
+		# Set trigger
+		self.con.execute(f'SOUR{gen_settings['channel']+1}:TRIg:SOUR {gen_settings['trigger']}')
+		# Set parameters
+		self.con.execute(f'SOUR{gen_settings['channel']+1}:FUNC {gen_settings['type']}')
+		self.con.execute(f'SOUR{gen_settings['channel']+1}:FREQ:FIX {str(gen_settings['freq'])}')
+		self.con.execute(f'SOUR{gen_settings['channel']+1}:VOLT {str(gen_settings['amp'])}')
+		self.con.execute(f'SOUR{gen_settings['channel']+1}:PHAS {str(gen_settings['phase'])}')
+		self.con.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {str(gen_settings['offset'])}')
 
-	status = self.synth_on(f'SOUR{gen_settings['channel']}')
-	if not status:
-		print('Synthesizer failed to power on.')
-		raise
+		status = self.synth_on(f'SOUR{gen_settings['channel']}')
+		if not status:
+			print('Synthesizer failed to power on.')
+			raise
 	
-	return True
+		return True
 
 	def synth_on(self, channel):
 		try:
