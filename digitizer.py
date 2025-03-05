@@ -152,9 +152,9 @@ class Pitaya():
 		if self.two_channel: 
 			ch2_data = self.query(f"ACQ:AXI:SOUR2:DATA:Start:N? {posChB},{self.data_size}")
 		
-		signal_ch1	= list(map(float, signal_ch1.strip('{}\n\r').replace("  ", "").split(',')))
+		signal_ch1	= list(map(float, ch1_data.strip('{}\n\r').replace("  ", "").split(',')))
 		if self.two_channel:
-			signal_ch2 = list(map(float, signal_ch2.strip('{}\n\r').replace("  ", "").split(',')))
+			signal_ch2 = list(map(float, ch2_data.strip('{}\n\r').replace("  ", "").split(',')))
 			
 		# Disable Pitaya acquistion
 		self.execute('ACQ:AXI:SOUR1:ENable OFF')
