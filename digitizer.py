@@ -120,7 +120,7 @@ class Pitaya():
 		
 		# Begin acquisition
 		self.execute('ACQ:START')
-		self.execute('ACQ:TRig CH1_PE') # Trigger on channel 1 edge
+		self.execute('ACQ:TRig CH2_PE') # Trigger on channel 1 edge
 	
 		# Wait for trigger
 		while 1: 
@@ -209,7 +209,7 @@ if __name__ == '__main__':
 	dig = Pitaya(host='192.168.0.2', name='Pitaya', timeout=5.0, two_channel=True)
 
 	# Test run -- enable AWG CW output on output channel 1 and
-	# feed into input channel 1; enable 10 MHz external reference,
+	# feed into input channel 2; enable 10 MHz external reference,
 	# and use rising edge for this signal to trigger 
 	dig.set_synth(freq=10.0E6, amp=0.5, channel=0)
 
