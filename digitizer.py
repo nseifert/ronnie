@@ -1,6 +1,13 @@
 from Instrument import Instrument
+import redpitaya_scpi as scpi
 
-class Pitaya(Instrument):
+class Pitaya():
+
+	def execute(self, cmd, **kwargs):
+		return self.con.tx_txt(cmd, **kwargs)
+	def query(self, cmd, **kwargs):
+		self.execute(cmd, **kwargs)
+		return self.con.rx_txt()
 
 	def acquire(self):
 	
@@ -86,9 +93,10 @@ class Pitaya(Instrument):
 
 	def __init__(self, **kwargs):
 	
-		super(Pitaya, self).__init__(**kwargs)
-		
 		self.settings = {
+			'host': '192.168.0.2' # Set to default value for Pitaya for Gerry
+			'port': 5000 # Shouldn't change
+			'timeout': None # set to time in seconds if otherwise
 			'srate': 250E6,
 			'data_size': 32768, #16 bit samples
 			'acq_len': 16384,
@@ -107,6 +115,10 @@ class Pitaya(Instrument):
 			else:
 				self.__setattr__(k, self.settings[k])
 
+		try: 
+			self.con = scpi(host = self.host, port = self.port, timeout = self.timeout)
+		except: # Connection failed
+			raise 
 if __name__ == '__main__':
-	dig = Pitaya(ip_addr='192.168.0.69', name='Pitaya',connect_type='ip')
+	dig = Pitaya(addr='192.168.0.69', name='Pitaya')
 	
