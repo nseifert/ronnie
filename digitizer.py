@@ -66,7 +66,8 @@ class Pitaya():
 
 	def synth_on(self, channel):
 		try:
-			self.execute(f'OUTPUT{str(channel+1)}: STATE ON')
+			chan = str(channel + 1)
+			self.execute(f'OUTPUT{chan}: STATE ON')
 			return True
 		except:
 			raise
@@ -74,7 +75,8 @@ class Pitaya():
 
 	def synth_off(self, channel):
 		try:
-			self.execute(f'OUTPUT{str(channel+1)}: STATE OFF')
+			chan = str(channel + 1)
+			self.execute(f'OUTPUT{chan}: STATE OFF')
 			return True
 		except:
 			return False
