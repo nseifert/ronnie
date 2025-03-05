@@ -138,7 +138,7 @@ class Pitaya():
 		
 		# Stop acquisition
 		self.execute('ACQ:STOP')
-		print(f"Acquistion timing: {acq_end - acq_start}")
+		print(f"Acquistion timing: {(acq_end - acq_start)*100:.2f} ms")
 		
 		# Collect data
 		
@@ -152,9 +152,9 @@ class Pitaya():
 		if self.two_channel: 
 			ch2_data = self.query(f"ACQ:AXI:SOUR2:DATA:Start:N? {posChB},{self.data_size}")
 		
-		signal_ch1	= ch1_data.strip('{}\n\r').replace("  ", "").split(',')
+		signal_ch1	= list(map(float, signal_ch1.strip('{}\n\r').replace("  ", "").split(',')))
 		if self.two_channel:
-			signal_ch2 = ch2_data.strip('{}\n\r').replace("	 ", "").split(',')
+			signal_ch2 = list(map(float, signal_ch2.strip('{}\n\r').replace("  ", "").split(',')))
 			
 		# Disable Pitaya acquistion
 		self.execute('ACQ:AXI:SOUR1:ENable OFF')
@@ -176,7 +176,7 @@ class Pitaya():
 			'name': 'Pitaya',
 
 			'srate': 250E6,
-			'data_size': 32768, #16 bit samples
+			'data_size': 16384, #16 bit samples
 			'acq_len': 16384,
 			'num_avg': 20,
 			'decimation': 1, # should always be set to 1 unless otherwise needed
@@ -214,6 +214,5 @@ if __name__ == '__main__':
 	print(data)
 	dig.synth_off()
 
-	buff1 = list(map(float, data.strip('{}\n\r').replace("  ", "").split(',')))
 	plt.plot(buff1)
 	plt.show()
