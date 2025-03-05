@@ -62,6 +62,7 @@ class Pitaya():
 				print('Synthesizer failed to power on.')
 		except:
 			raise
+		print(f'Synthesizer set to {gen_settings['freq']} Hz, {gen_settings['amp']} V, trig: {gen_settings['trigger']}')
 		return True
 
 	def synth_on(self, channel):
@@ -77,6 +78,7 @@ class Pitaya():
 		try:
 			chan = channel + 1
 			self.execute(f'OUTPUT{chan}: STATE OFF')
+			print('Synthesizer disabled successfully.')
 			return True
 		except:
 			return False
@@ -113,7 +115,7 @@ class Pitaya():
 		
 		# Begin acquisition
 		self.execute('ACQ:START')
-		self.execute('ACQ:TRig CH1_PE') # Trigger on channel 1 edge
+		self.execute('ACQ:TRig INT') # Trigger on channel 1 edge
 	
 		# Wait for trigger
 		while 1: 
