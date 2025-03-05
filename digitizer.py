@@ -8,6 +8,75 @@ class Pitaya():
 		self.execute(cmd, **kwargs)
 		return self.con.rx_txt()
 
+	def set_synth(self, freq, amp, **kwargs):
+		gen_settings = {
+		'channel': 0,
+		'freq': 1.0E6,
+		'type': {'SINE', 'SQUARE', 'TRIANGLE', 'SAWU', 'SAWD', 'PWM', 'ARBITRARY', 'DC', 'DC_NEG'},
+		'amp': 0.5, # 0.5 Vpp default
+		'offset': 0, # +0 V offset 
+		'phase': 0, # in degrees
+		'trigger': ['INT','EXT']
+		'trig_lvl': 0.25 # only if EXT is selected for trigger
+		}
+
+		for k in self.gen_settings.keys():
+			if k in kwargs:
+				gen_settings.update({k: kwargs[k]})
+			if k == 'type':
+				if k in kwargs:
+					gen_settings.update(kwargs[k].upper())
+				else:
+					gen_settings.update({k: 'SINE'})
+			if k == 'channel':
+				if k in kwargs:
+					if kwargs['channel'] != 0 or kwargs['channel'] != 1:
+						print('ERROR: Requested channel for synthesizer is not valid; must either be 0 or 1.')
+						raise ValueError 
+			if k == 'trigger':
+				if k in kwargs:
+					if 'int' in kwargs['trigger'].lower():
+						gen_settings.update({'trigger': 'INT'})
+					elif 'ext' in kwargs['trigger'].lower():
+						gen_settings.update({'trigger': 'EXT_PE'})
+					else: # Just let Forrest run free!!!
+						gen_settings.update({'trigger': 'INT'})
+				if 'trig_lvl' in kwargs:
+					gen_settings.update({'trig_lvl': kwargs['trig_lvl']})
+		
+	# Reset synthesizer
+	self.con.execute('GEN:RST')
+
+	# Set trigger
+	self.con.execute(f'SOUR{gen_settings['channel']+1}:TRIg:SOUR {gen_settings['trigger']}')
+	# Set parameters
+	self.con.execute(f'SOUR{gen_settings['channel']+1}:FUNC {gen_settings['type']}')
+	self.con.execute(f'SOUR{gen_settings['channel']+1}:FREQ:FIX {str(gen_settings['freq'])}')
+	self.con.execute(f'SOUR{gen_settings['channel']+1}:VOLT {str(gen_settings['amp'])}')
+	self.con.execute(f'SOUR{gen_settings['channel']+1}:PHAS {str(gen_settings['phase'])}')
+	self.con.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {str(gen_settings['offset'])}')
+
+	status = self.synth_on(f'SOUR{gen_settings['channel']}')
+	if not status:
+		print('Synthesizer failed to power on.')
+		raise
+	
+	return True
+
+	def synth_on(self, channel):
+		try:
+			self.con.execute(f'OUTPUT{str(channel+1)}: STATE ON')
+			return True
+		except:
+			return False
+
+	def synth_off(self, channel):
+		try:
+			self.con.execute(f'OUTPUT{str(channel+1)}: STATE ON')
+			return True
+		except:
+			return False
+			
 	def acquire(self):
 	
 		# Reset and clear buffer
@@ -117,9 +186,18 @@ class Pitaya():
 				self.__setattr__(k, self.settings[k])
 
 		try: 
+			print(f'Connecting to {self.name} SCPI server @ {self.host}:{self.port}')
 			self.con = scpi.scpi(host = self.host, port = self.port, timeout = self.timeout)
 		except: # Connection failed
+			print('WARNING: SCPI SERVER CONNECTION FAILED. Make sure the host address is correct and the SCPI server is enabled!')
 			raise 
+		else:
+			print('Connection successful.')
 if __name__ == '__main__':
+
 	dig = Pitaya(host='192.168.0.2', name='Pitaya', timeout=5.0)
+
+	# Test run -- enable AWG CW output on output channel 1 and
+	# feed into input channel 1; enable 10 MHz external reference,
+	# and use rising edge for this signal to trigger 
 	
