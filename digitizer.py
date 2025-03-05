@@ -206,7 +206,7 @@ class Pitaya():
 			print('Connection successful.')
 if __name__ == '__main__':
 
-	dig = Pitaya(host='192.168.0.2', name='Pitaya', timeout=5.0)
+	dig = Pitaya(host='192.168.0.2', name='Pitaya', timeout=5.0, two_channel=True)
 
 	# Test run -- enable AWG CW output on output channel 1 and
 	# feed into input channel 1; enable 10 MHz external reference,
@@ -214,8 +214,10 @@ if __name__ == '__main__':
 	dig.set_synth(freq=10.0E6, amp=0.5, channel=0)
 
 	data = dig.acquire()
-	print(data)
+	#print(data)
 	dig.synth_off(channel=0)
 
-	plt.plot(data)
+	plt.plot(data[0],label='Chan 0')
+	plt.plot(data[1],label='Chan 1')
+	plt.legend()
 	plt.show()
