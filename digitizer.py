@@ -117,7 +117,7 @@ class Pitaya():
 		
 		# Begin acquisition
 		self.execute('ACQ:START')
-		self.execute('ACQ:TRig INT') # Trigger on channel 1 edge
+		self.execute('ACQ:TRig CH1_PE') # Trigger on channel 1 edge
 	
 		# Wait for trigger
 		while 1: 
