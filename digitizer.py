@@ -40,8 +40,8 @@ class Pitaya():
 						gen_settings.update({'trigger': 'INT'})
 					elif 'ext' in kwargs['trigger'].lower():
 						gen_settings.update({'trigger': 'EXT_PE'})
-					else: # Just let Forrest run free!!!
-						gen_settings.update({'trigger': 'INT'})
+				else: # Just let Forrest run free!!!
+					gen_settings.update({'trigger': 'INT'})
 				if 'trig_lvl' in kwargs:
 					gen_settings.update({'trig_lvl': kwargs['trig_lvl']})
 		
@@ -70,7 +70,7 @@ class Pitaya():
 		try:
 			chan = channel + 1
 			self.execute(f'OUTPUT{chan}: STATE ON')
-			self.execute(f'SOUR{chan}:TRIg:SOUR INT')
+			self.execute(f'SOUR{chan}:TRIg:SOUR:INT')
 			return True
 		except:
 			raise
