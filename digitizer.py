@@ -71,11 +71,10 @@ class Pitaya():
 		try:
 			chan = channel + 1
 			self.execute(f'OUTPUT{chan}:STATE ON')
-			self.execute(f'SOUR{gen_setting['channel']+1}:TRIg:SOUR INT')
+			self.execute(f'SOUR{chan+1}:TRIg:SOUR INT')
 			return True
 		except:
 			raise
-		finally:
 			return False
 
 	def synth_off(self, channel):
@@ -119,7 +118,7 @@ class Pitaya():
 		
 		# Begin acquisition
 		self.execute('ACQ:START')
-		self.execute('ACQ:TRig CH2_PE') # Trigger on channel 1 edge
+		self.execute('ACQ:TRig CH1_PE') # Trigger on channel 1 edge
 	
 		# Wait for trigger
 		while 1: 
@@ -178,8 +177,8 @@ class Pitaya():
 			'name': 'Pitaya',
 
 			'srate': 250E6,
-			'data_size': 16384, #16 bit samples
-			'acq_len': 16384,
+			'data_size': 16384/4, #16 bit samples
+			'acq_len': 16384/4,
 			'num_avg': 20,
 			'decimation': 1, # should always be set to 1 unless otherwise needed
 			'two_channel': False,
@@ -213,10 +212,11 @@ if __name__ == '__main__':
 	dig.set_synth(freq=10.0E6, amp=0.5, channel=0)
 
 	data_set = []
+	fig, ax = plt.subplots(2,sharex=True)
 	for idx in range(5):
 		data = dig.acquire()
-		plt.plot(data, label=f'Acq {idx}')
-	
+		ax[0].plot(data[0], label=f'Acq {idx}')
+		ax[1].plot(data[1], label=f'Acq {idx}')
 	plt.legend()
 	plt.show()
 
