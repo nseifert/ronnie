@@ -209,5 +209,11 @@ if __name__ == '__main__':
 	# feed into input channel 1; enable 10 MHz external reference,
 	# and use rising edge for this signal to trigger 
 	dig.set_synth(freq=10.0E6, amp=0.5, channel=0)
-	dig.acquire()	
+
+	data = dig.acquire()
+	print(data)
 	dig.synth_off()
+
+	buff1 = list(map(float, data.strip('{}\n\r').replace("  ", "").split(',')))
+	plt.plot(buff1)
+	plt.show()
