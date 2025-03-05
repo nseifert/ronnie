@@ -215,5 +215,5 @@ if __name__ == '__main__':
 	print(data)
 	dig.synth_off(channel=0)
 
-	plt.plot(buff1)
+	plt.plot(data)
 	plt.show()
