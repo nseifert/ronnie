@@ -70,6 +70,7 @@ class Pitaya():
 		try:
 			chan = channel + 1
 			self.execute(f'OUTPUT{chan}: STATE ON')
+			self.execute(f'SOUR{chan}:TRIg:SOUR INT')
 			return True
 		except:
 			raise
