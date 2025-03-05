@@ -16,8 +16,8 @@ class Pitaya():
 		'amp': 0.5, # 0.5 Vpp default
 		'offset': 0, # +0 V offset 
 		'phase': 0, # in degrees
-		'trigger': ['INT','EXT']
-		'trig_lvl': 0.25 # only if EXT is selected for trigger
+		'trigger': ['INT','EXT'],
+		'trig_lvl': 0.25, # only if EXT is selected for trigger
 		}
 
 		for k in self.gen_settings.keys():
@@ -76,7 +76,7 @@ class Pitaya():
 			return True
 		except:
 			return False
-			
+
 	def acquire(self):
 	
 		# Reset and clear buffer
