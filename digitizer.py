@@ -20,7 +20,7 @@ class Pitaya():
 		'trig_lvl': 0.25, # only if EXT is selected for trigger
 		}
 
-		for k in self.gen_settings.keys():
+		for k in gen_settings.keys():
 			if k in kwargs:
 				gen_settings.update({k: kwargs[k]})
 			if k == 'type':
@@ -30,9 +30,9 @@ class Pitaya():
 					gen_settings.update({k: 'SINE'})
 			if k == 'channel':
 				if k in kwargs:
-					if kwargs['channel'] != 0 or kwargs['channel'] != 1:
-						print('ERROR: Requested channel for synthesizer is not valid; must either be 0 or 1.')
-						raise ValueError 
+					if kwargs['channel'] not in [0,1]:
+						print('ERROR: Requested channel for synthesizer is not valid; must either be 0 or 1. \n Requested channel: {}'.format(kwargs['channel']))
+						raise 
 			if k == 'trigger':
 				if k in kwargs:
 					if 'int' in kwargs['trigger'].lower():
@@ -45,34 +45,36 @@ class Pitaya():
 					gen_settings.update({'trig_lvl': kwargs['trig_lvl']})
 		
 	# Reset synthesizer
-		self.con.execute('GEN:RST')
+		self.execute('GEN:RST')
 
 		# Set trigger
-		self.con.execute(f'SOUR{gen_settings['channel']+1}:TRIg:SOUR {gen_settings['trigger']}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:TRIg:SOUR {gen_settings['trigger']}')
 		# Set parameters
-		self.con.execute(f'SOUR{gen_settings['channel']+1}:FUNC {gen_settings['type']}')
-		self.con.execute(f'SOUR{gen_settings['channel']+1}:FREQ:FIX {str(gen_settings['freq'])}')
-		self.con.execute(f'SOUR{gen_settings['channel']+1}:VOLT {str(gen_settings['amp'])}')
-		self.con.execute(f'SOUR{gen_settings['channel']+1}:PHAS {str(gen_settings['phase'])}')
-		self.con.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {str(gen_settings['offset'])}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:FUNC {gen_settings['type']}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:FREQ:FIX {str(gen_settings['freq'])}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT {str(gen_settings['amp'])}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:PHAS {str(gen_settings['phase'])}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {str(gen_settings['offset'])}')
 
-		status = self.synth_on(f'SOUR{gen_settings['channel']}')
-		if not status:
-			print('Synthesizer failed to power on.')
+		try:
+			status = self.synth_on(f'SOUR{gen_settings['channel']}')
+			if not status:
+				print('Synthesizer failed to power on.')
+		except:
 			raise
-	
 		return True
 
 	def synth_on(self, channel):
 		try:
-			self.con.execute(f'OUTPUT{str(channel+1)}: STATE ON')
+			self.execute(f'OUTPUT{str(channel+1)}: STATE ON')
 			return True
 		except:
+			raise
 			return False
 
 	def synth_off(self, channel):
 		try:
-			self.con.execute(f'OUTPUT{str(channel+1)}: STATE ON')
+			self.execute(f'OUTPUT{str(channel+1)}: STATE ON')
 			return True
 		except:
 			return False
@@ -175,7 +177,7 @@ class Pitaya():
 			'two_channel': False,
 			'master_channel': 1,
 			'slave_channel': 2,
-			'trig_lvl': 0.0
+			'trig_lvl': 0.2
 		}
 		
 		for k in self.settings.keys():
@@ -200,4 +202,6 @@ if __name__ == '__main__':
 	# Test run -- enable AWG CW output on output channel 1 and
 	# feed into input channel 1; enable 10 MHz external reference,
 	# and use rising edge for this signal to trigger 
-	
+	dig.set_synth(freq=10.0E6, amp=0.5, channel=0)
+	dig.acquire()	
+	dig.synth_off()
