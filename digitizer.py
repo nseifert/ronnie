@@ -71,6 +71,7 @@ class Pitaya():
 		try:
 			chan = channel + 1
 			self.execute(f'OUTPUT{chan}:STATE ON')
+			self.execute(f'SOUR{gen_setting['channel']+1}:TRIg:SOUR INT')
 			return True
 		except:
 			raise
@@ -184,7 +185,7 @@ class Pitaya():
 			'two_channel': False,
 			'master_channel': 1,
 			'slave_channel': 2,
-			'trig_lvl': 0.2
+			'trig_lvl': 0.1
 		}
 		
 		for k in self.settings.keys():
