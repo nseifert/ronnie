@@ -94,20 +94,20 @@ class StepperMotorControlApp:
 		self.connect_button = tk.Button(root, text="Connect", command=self.connect_motor)
 		self.connect_button.pack(pady=5)
 
-		self.velocity_label = tk.Label(root, text="Velocity (RPM):")
+		self.velocity_label = tk.Label(root, text="Set Velocity (RPM):")
 		self.velocity_label.pack(pady=5)
 		
+	
+		self.velocity_entry = tk.Entry(root)
+		self.velocity_entry.pack(pady=5)
+		
+		# Current velocity update thread
 		self.cur_velocity = tk.StringVar(value='Current Velocity: 0')	   
 		self.cur_velocity_label = tk.Label(root, textvariable=self.cur_velocity)
 		self.cur_velocity_label.pack(pady=5)
-		
-		# Current velocity update thread
 		self.vel_thread = Thread(target=self.read_velocity)
 		self.vel_thread.daemon = True
 		self.vel_thread.start()
-
-		self.velocity_entry = tk.Entry(root)
-		self.velocity_entry.pack(pady=5)
 
 		self.set_velocity_button = tk.Button(root, text="Set Velocity", command=self.set_velocity)
 		self.set_velocity_button.pack(pady=5)

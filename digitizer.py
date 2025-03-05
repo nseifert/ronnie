@@ -94,9 +94,9 @@ class Pitaya():
 	def __init__(self, **kwargs):
 	
 		self.settings = {
-			'host': '192.168.0.2' # Set to default value for Pitaya for Gerry
-			'port': 5000 # Shouldn't change
-			'timeout': None # set to time in seconds if otherwise
+			'host': '192.168.0.2', # Set to default value for Pitaya for Gerry
+			'port': 5000, # Shouldn't change
+			'timeout': None, # set to time in seconds if otherwise
 			'srate': 250E6,
 			'data_size': 32768, #16 bit samples
 			'acq_len': 16384,
@@ -120,5 +120,5 @@ class Pitaya():
 		except: # Connection failed
 			raise 
 if __name__ == '__main__':
-	dig = Pitaya(addr='192.168.0.69', name='Pitaya')
+	dig = Pitaya(addr='192.168.0.2', name='Pitaya')
 	
