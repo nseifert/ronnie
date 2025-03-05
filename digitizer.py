@@ -1,5 +1,6 @@
 import redpitaya_scpi as scpi
 import time
+from matplotlib import pyplot as plt
 
 class Pitaya():
 
@@ -212,7 +213,7 @@ if __name__ == '__main__':
 
 	data = dig.acquire()
 	print(data)
-	dig.synth_off()
+	dig.synth_off(channel=0)
 
 	plt.plot(buff1)
 	plt.show()
