@@ -1,4 +1,3 @@
-from Instrument import Instrument
 import redpitaya_scpi as scpi
 
 class Pitaya():
@@ -97,6 +96,8 @@ class Pitaya():
 			'host': '192.168.0.2', # Set to default value for Pitaya for Gerry
 			'port': 5000, # Shouldn't change
 			'timeout': None, # set to time in seconds if otherwise
+			'name': 'Pitaya',
+
 			'srate': 250E6,
 			'data_size': 32768, #16 bit samples
 			'acq_len': 16384,
@@ -108,17 +109,17 @@ class Pitaya():
 			'trig_lvl': 0.0
 		}
 		
-		for k in kwargs.keys():
+		for k in self.settings.keys():
 		
-			if k in self.settings:
+			if k in kwargs:
 				self.__setattr__(k, kwargs[k])
 			else:
 				self.__setattr__(k, self.settings[k])
 
 		try: 
-			self.con = scpi(host = self.host, port = self.port, timeout = self.timeout)
+			self.con = scpi.scpi(host = self.host, port = self.port, timeout = self.timeout)
 		except: # Connection failed
 			raise 
 if __name__ == '__main__':
-	dig = Pitaya(addr='192.168.0.2', name='Pitaya')
+	dig = Pitaya(host='192.168.0.2', name='Pitaya', timeout=5.0)
 	
