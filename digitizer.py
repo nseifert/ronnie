@@ -1,4 +1,5 @@
 import redpitaya_scpi as scpi
+import time
 
 class Pitaya():
 
