@@ -53,10 +53,10 @@ class Pitaya():
 		self.execute(f'SOUR{gen_settings['channel']+1}:TRIg:SOUR {gen_settings['trigger']}')
 		# Set parameters
 		self.execute(f'SOUR{gen_settings['channel']+1}:FUNC {gen_settings['type'].upper()}')
-		self.execute(f'SOUR{gen_settings['channel']+1}:FREQ:FIX {str(gen_settings['freq'])}')
-		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT {str(gen_settings['amp'])}')
-		self.execute(f'SOUR{gen_settings['channel']+1}:PHAS {str(gen_settings['phase'])}')
-		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {str(gen_settings['offset'])}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:FREQ:FIX {gen_settings['freq']}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT {gen_settings['amp']}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:PHAS {gen_settings['phase']}')
+		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {gen_settings['offset']}')
 
 		try:
 			status = self.synth_on(gen_settings['channel'])
@@ -70,17 +70,19 @@ class Pitaya():
 	def synth_on(self, channel):
 		try:
 			chan = channel + 1
-			self.execute(f'OUTPUT{chan}: STATE ON')
+			self.execute(f'OUTPUT{chan}:STATE ON')
 			self.execute(f'SOUR{chan}:TRIg:INT')
-			return True
+			if self.query(f'OUTPUT{chan}:STATE?') == 'ON':
+				return True
 		except:
 			raise
+		finally:
 			return False
 
 	def synth_off(self, channel):
 		try:
 			chan = channel + 1
-			self.execute(f'OUTPUT{chan}: STATE OFF')
+			self.execute(f'OUTPUT{chan}:STATE OFF')
 			print('Synthesizer disabled successfully.')
 			return True
 		except:
