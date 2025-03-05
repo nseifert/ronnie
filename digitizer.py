@@ -71,9 +71,7 @@ class Pitaya():
 		try:
 			chan = channel + 1
 			self.execute(f'OUTPUT{chan}:STATE ON')
-			self.execute(f'SOUR{chan}:TRIg:INT')
-			if self.query(f'OUTPUT{chan}:STATE?') == 'ON':
-				return True
+			return True
 		except:
 			raise
 		finally:
@@ -213,11 +211,13 @@ if __name__ == '__main__':
 	# and use rising edge for this signal to trigger 
 	dig.set_synth(freq=10.0E6, amp=0.5, channel=0)
 
-	data = dig.acquire()
-	#print(data)
-	dig.synth_off(channel=0)
-
-	plt.plot(data[0],label='Chan 0')
-	plt.plot(data[1],label='Chan 1')
+	data_set = []
+	for idx in range(5):
+		data = dig.acquire()
+		plt.plot(data, label=f'Acq {idx}')
+	
 	plt.legend()
 	plt.show()
+
+	dig.synth_off(channel=0)
+
