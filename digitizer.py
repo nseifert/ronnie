@@ -57,7 +57,7 @@ class Pitaya():
 		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {str(gen_settings['offset'])}')
 
 		try:
-			status = self.synth_on(f'SOUR{gen_settings['channel']}')
+			status = self.synth_on(gen_settings['channel'])
 			if not status:
 				print('Synthesizer failed to power on.')
 		except:
