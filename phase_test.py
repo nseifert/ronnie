@@ -13,8 +13,9 @@ if __name__ == "__main__":
     INTERVALS = rng.integers(low=1,high=25, size=int(TOTAL_TIME/25))
 
     # Set up digitizer
-    dig = Pitaya(host='192.168.0.2', name='Pitaya', timeout=5.0,
-                 two_channel=False,
+    dig = Pitaya(host='192.168.0.2', name='Pitaya',
+                 timeout=5.0,
+                 two_channel= False,
                  trig_lvl = 0.025,
                  data_size = 16384/8,
                  acq_len = 16384/8)
