@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print(f'Building accumulation array of dimensions {dig.data_size} x {NUM_AVERAGES}')
     accumulated = np.zeros((int(dig.data_size), NUM_AVERAGES))
     for i in range(NUM_AVERAGES):
-        accumulated[i,:] = dig.acquire().T
+        accumulated[:,i] = dig.acquire()
         print(f'Acquired {i+1}/{NUM_AVERAGES} acquistions')
     
     averaged = np.mean(accumulated,axis=1)
