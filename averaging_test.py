@@ -22,7 +22,7 @@ if __name__ == "__main__":
     
     averaged = np.mean(accumulated,axis=1)
     plt.plot(accumulated[:,0],'k--',label='First shot')
-    plt.plot(averaged, 'r' label='Average acq')
+    plt.plot(averaged, 'r', label='Average acq')
     plt.show()
 
         
