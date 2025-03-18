@@ -20,9 +20,9 @@ if __name__ == "__main__":
         accumulated[:,i] = dig.acquire()
         print(f'Acquired {i+1}/{NUM_AVERAGES} acquistions')
     
-    averaged = np.mean(accumulated,axis=0)
-    plt.plot(accumulated[:,0],'--',label='First shot')
-    plt.plot(averaged, label='Average acq')
+    averaged = np.mean(accumulated,axis=1)
+    plt.plot(accumulated[:,0],'k--',label='First shot')
+    plt.plot(averaged, 'r' label='Average acq')
     plt.show()
 
         
