@@ -163,9 +163,9 @@ class Pitaya():
 			self.execute('ACQ:AXI:SOUR2:ENable OFF')
 			
 		if self.two_channel:
-			return signal_ch1, signal_ch2
+			return np.array(signal_ch1), np.array(signal_ch2)
 		else:
-			return signal_ch1
+			return np.array(signal_ch1)
 		
 
 	def __init__(self, **kwargs):
