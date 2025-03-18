@@ -1,6 +1,7 @@
 import redpitaya_scpi as scpi
 import time
 from matplotlib import pyplot as plt
+import numpy as np
 
 class Pitaya():
 
