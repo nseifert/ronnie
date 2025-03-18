@@ -18,6 +18,7 @@ if __name__ == "__main__":
     accumulated = np.zeros((dig.data_size, NUM_AVERAGES))
     for i in range(NUM_AVERAGES):
         accumulated[i,:] = dig.acquire()
+        print(f'Acquired {i+1}/{NUM_AVERAGES} acquistions')
     
     averaged = np.mean(accumulated,axis=1)
     plt.plot(accumulated[0,:],'--',label='First shot')
