@@ -11,11 +11,11 @@ if __name__ == "__main__":
                  timeout=5.0,
                  two_channel= False,
                  trig_lvl = 0.025,
-                 data_size = 16384/8,
-                 acq_len = 16384/8)
+                 data_size = 16384//8,
+                 acq_len = 16384//8)
 
     print(f'Building accumulation array of dimensions {dig.data_size} x {NUM_AVERAGES}')
-    accumulated = np.zeros((dig.data_size, NUM_AVERAGES))
+    accumulated = np.zeros((int(dig.data_size), NUM_AVERAGES))
     for i in range(NUM_AVERAGES):
         accumulated[i,:] = dig.acquire()
         print(f'Acquired {i+1}/{NUM_AVERAGES} acquistions')
