@@ -21,6 +21,7 @@ class Pitaya():
 		'phase': 0, # in degrees
 		'trigger': ['INT','EXT'],
 		'trig_lvl': 0.25, # only if EXT is selected for trigger
+		'pwm_duty': .1
 		}
 
 		for k in gen_settings.keys():
@@ -59,6 +60,9 @@ class Pitaya():
 		self.execute(f'SOUR{gen_settings['channel']+1}:PHAS {gen_settings['phase']}')
 		self.execute(f'SOUR{gen_settings['channel']+1}:VOLT:OFFS {gen_settings['offset']}')
 
+		if gen_settings['type'] == 'PWM':
+			self.execute(f'SOUR{gen_settings['channel']+1}:DCYC {gen_settings['pwm_duty']}')
+			
 		try:
 			status = self.synth_on(gen_settings['channel'])
 			if not status:
@@ -87,6 +91,13 @@ class Pitaya():
 		except:
 			return False
 
+	def ext_clock(self):
+		try:
+			self.execute('RP:PLL:EN ON')
+			print('Enabled 10 MHz clock')
+			return True
+		except:
+			return False
 	def acquire(self):
 	
 		# Reset and clear buffer
@@ -119,7 +130,7 @@ class Pitaya():
 		
 		# Begin acquisition
 		self.execute('ACQ:START')
-		self.execute('ACQ:TRig CH1_PE') # Trigger on channel 1 edge
+		self.execute('ACQ:TRig CH2_PE') # Trigger on channel 1 edge
 	
 		# Wait for trigger
 		while 1: 
