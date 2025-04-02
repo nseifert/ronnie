@@ -15,13 +15,13 @@ class Pitaya():
 		gen_settings = {
 		'channel': 0,
 		'freq': 1.0E6,
-		'type': {'SINE', 'SQUARE', 'TRIANGLE', 'SAWU', 'SAWD', 'PWM', 'ARBITRARY', 'DC', 'DC_NEG'},
+		'type': ['SINE', 'SQUARE', 'TRIANGLE', 'SAWU', 'SAWD', 'PWM', 'ARBITRARY', 'DC', 'DC_NEG'],
 		'amp': 0.5, # 0.5 Vpp default
 		'offset': 0, # +0 V offset 
 		'phase': 0, # in degrees
 		'trigger': ['INT','EXT'],
 		'trig_lvl': 0.25, # only if EXT is selected for trigger
-		'pwm_duty': .1
+		'pwm_duty': 0.25
 		}
 
 		for k in gen_settings.keys():
@@ -29,7 +29,7 @@ class Pitaya():
 				gen_settings.update({k: kwargs[k]})
 			if k == 'type':
 				if k in kwargs:
-					gen_settings.update(kwargs[k].upper())
+					gen_settings.update({k: kwargs[k].upper()})
 				else:
 					gen_settings.update({k: 'SINE'})
 			if k == 'channel':
@@ -75,8 +75,8 @@ class Pitaya():
 	def synth_on(self, channel):
 		try:
 			chan = channel + 1
+			self.execute(f'SOUR{chan}:TRIg:INT')
 			self.execute(f'OUTPUT{chan}:STATE ON')
-			self.execute(f'SOUR{chan+1}:TRIg:INT')
 			return True
 		except:
 			raise
