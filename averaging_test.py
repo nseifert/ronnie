@@ -5,20 +5,20 @@ import numpy as np
 from scipy.fftpack import fft, fftfreq
 
 if __name__ == "__main__":
-    FREQ = 14 # GHz
-    NUM_AVERAGES = 1
+    FREQ = 10 # GHz
+    NUM_AVERAGES = 10
 
     # Set up digitizer
     dig = Pitaya(host='192.168.0.2', name='Pitaya',
                  timeout=5.0,
                  two_channel= True,
-                 trig_lvl = 0.25,
-                 data_size = 15000,
-                 acq_len = 15000,)
+                 trig_lvl = 0.1,
+                 data_size = 30000, #4 ns per point; 250 pts per us
+                 acq_len = 30000,)
     
     dig.ext_clock() # Enable external clock
     # Enable trigger source on Out1 --> CH2 Trig
-    dig.set_synth(freq=30E4, amp=1.0, channel=0,type='SINE')
+    #dig.set_synth(freq=30E4, amp=1.0, channel=0,type='SINE')
 
     print(f'Building accumulation array of dimensions {dig.data_size} x {NUM_AVERAGES}')
     accumulated = np.zeros((int(dig.data_size), NUM_AVERAGES))
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     
     plt.show()
 
-    np.savetxt(f'Spec_OFFRES_{FREQ}GHz.txt',averaged)
+    np.savetxt(f'Cavity_Decay\\10GHz_ON_RES_10dBm_all_acq.txt',accumulated)
 
 
         
